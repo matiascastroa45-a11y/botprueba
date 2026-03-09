@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -549,12 +548,14 @@ function showTurnoForm() {
           <option>Corte</option><option>Tinte</option><option>Mechas</option><option>Corte + Barba</option>
         </select>
       </div>
-      <div class="form-field"><label>Fecha</label><input type="date" id="f_fecha"/></div>
-      <div class="form-field"><label>Horario</label>
+      <div class="form-field">
+        <label>Fecha</label>
+        <input type="date" id="f_fecha" onchange="cargarHorarios(this.value)"/>
+      </div>
+      <div class="form-field">
+        <label>Horario</label>
         <select id="f_horario">
-          <option value="">Seleccioná...</option>
-          <option>9:00</option><option>10:00</option><option>11:00</option>
-          <option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option>
+          <option value="">Primero elegí una fecha...</option>
         </select>
       </div>
       <div class="form-field"><label>Tu WhatsApp</label><input type="tel" id="f_tel" placeholder="1123456789"/></div>
@@ -563,13 +564,34 @@ function showTurnoForm() {
     <span class="msg-time">${now()}</span>`;
   b.appendChild(d);
 
-  // Atrás y Menú disponibles debajo del form
   const nav = document.createElement('div');
   nav.className = 'nav-btns';
   nav.innerHTML = `<button class="nav-btn primary" onclick="goBack()">← Atrás</button>
                    <button class="nav-btn" onclick="goHome()">🏠 Menú principal</button>`;
   b.appendChild(nav);
   scrollBottom();
+}
+
+// Consulta al Sheet los horarios libres para la fecha elegida
+function cargarHorarios(fecha) {
+  const select = document.getElementById('f_horario');
+  select.innerHTML = '<option value="">Cargando horarios...</option>';
+
+  fetch(APPS_SCRIPT_URL + "?action=horarios&fecha=" + fecha)
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok && data.horarios.length > 0) {
+        select.innerHTML = '<option value="">Seleccioná un horario...</option>';
+        data.horarios.forEach(h => {
+          select.innerHTML += `<option value="${h}">${h}</option>`;
+        });
+      } else {
+        select.innerHTML = '<option value="">No hay horarios disponibles para este día</option>';
+      }
+    })
+    .catch(() => {
+      select.innerHTML = '<option value="">Error al cargar horarios</option>';
+    });
 }
 
 function submitTurno() {
