@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -258,7 +259,7 @@ tr:hover td { background:var(--accent-light); }
 // ═══════════════════════════════════════════
 // ⚙️ URL DEL APPS SCRIPT — conectado al Google Sheet real
 // ═══════════════════════════════════════════
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzN1hxS9NsS2Q4qAMCFOBieXvsvvVc_07rdJ23BtmuhqdGIhNMDR0KJcjTHCgrKeEwlbw/exec";
+const APPS_SCRIPT_URL = "https://chatbot-turnos-proxy.matiascastroa45.workers.dev";
 
 // ═══════════════════════════════════════════
 // DATOS — en producción se leen del Google Sheet con fetch()
@@ -582,13 +583,15 @@ function submitTurno() {
   // Guardar en Sheet local para el demo visual
   SHEET.turnos.push({ nombre:n, servicio:s, fecha:f, horario:h, tel:t, estado:'Pendiente' });
 
-  // ✅ Enviar al Google Sheet via imagen (truco que evita CORS totalmente)
+  // ✅ Enviar al Google Sheet via Cloudflare Worker (sin CORS)
   const params = new URLSearchParams({ nombre:n, servicio:s, fecha:f, horario:h, tel:t, action:"guardar" });
-  const img = new Image();
-  img.src = APPS_SCRIPT_URL + "?" + params.toString();
-  img.onload = () => console.log("✅ Turno guardado en Sheet");
-  img.onerror = () => console.log("✅ Turno enviado (respuesta no-cors esperada)");
-  console.log("📤 Enviando turno...", params.toString());
+  fetch(APPS_SCRIPT_URL + "?" + params.toString())
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) console.log("✅ Turno guardado en Sheet");
+      else console.error("❌ Error:", data.error);
+    })
+    .catch(err => console.error("❌ Error de red:", err));
 
   const b = document.getElementById('chatBody');
   const conf = document.createElement('div');
