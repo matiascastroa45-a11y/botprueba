@@ -1,655 +1,735 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AI BATTLE – Pronósticos con 3 IAs</title>
-<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Oxanium:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatbot — Menú + Texto Libre</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#07080f;
-  --bg2:#0d0f1a;
-  --bg3:#12152a;
-  --border:rgba(255,255,255,0.06);
-  --claude:#7c6dfa;
-  --claude-dim:rgba(124,109,250,0.12);
-  --openai:#19c37d;
-  --openai-dim:rgba(25,195,125,0.12);
-  --gemini:#ea4335;
-  --gemini-dim:rgba(234,67,53,0.12);
-  --gold:#f5c842;
-  --text:#e8eaf0;
-  --muted:#4a5068;
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --bg: #f5f7ff;
+  --white: #fff;
+  --border: #e4e8f4;
+  --accent: #4f46e5;
+  --accent2: #7c3aed;
+  --accent-light: #eef2ff;
+  --green: #059669;
+  --green-light: #ecfdf5;
+  --text: #0f172a;
+  --muted: #64748b;
+  --light: #94a3b8;
+  --shadow: 0 4px 20px rgba(79,70,229,0.1);
+  --shadow-lg: 0 12px 40px rgba(79,70,229,0.18);
 }
-body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;padding:20px 16px;overflow-x:hidden}
-/* Grid noise texture */
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(circle at 20% 50%,rgba(124,109,250,0.04) 0%,transparent 50%),radial-gradient(circle at 80% 20%,rgba(25,195,125,0.04) 0%,transparent 50%),radial-gradient(circle at 60% 80%,rgba(234,67,53,0.04) 0%,transparent 50%);pointer-events:none;z-index:0}
-.container{max-width:900px;margin:0 auto;position:relative;z-index:1}
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+body::before {
+  content:''; position:fixed; inset:0;
+  background: radial-gradient(ellipse at 20% 20%, rgba(79,70,229,0.06) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, rgba(124,58,237,0.06) 0%, transparent 60%);
+  pointer-events:none;
+}
+.wrapper { width:100%; max-width:420px; position:relative; z-index:1; }
 
-/* HEADER */
-.header{text-align:center;margin-bottom:32px;padding-bottom:24px;border-bottom:1px solid var(--border)}
-.header-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.2);border-radius:4px;padding:4px 14px;margin-bottom:16px;letter-spacing:3px;font-size:11px;color:var(--gold);text-transform:uppercase;font-weight:600}
-h1{font-family:'Oxanium',sans-serif;font-weight:800;font-size:clamp(36px,8vw,64px);letter-spacing:-2px;line-height:0.9;margin-bottom:12px}
-.title-ai{color:var(--gold)}
-.title-battle{color:var(--text)}
-.subtitle{font-size:13px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+/* Sheet badge */
+.info-bar {
+  background:white; border:1px solid var(--border); border-radius:14px;
+  padding:12px 16px; margin-bottom:14px;
+  display:flex; align-items:center; gap:8px;
+  font-size:12px; color:var(--muted); box-shadow:var(--shadow);
+}
+.info-bar strong { color:var(--accent); }
+.sheet-badge {
+  margin-left:auto; display:flex; align-items:center; gap:5px;
+  background:var(--green-light); border:1px solid rgba(5,150,105,0.2);
+  color:var(--green); font-size:11px; font-weight:600;
+  padding:3px 10px; border-radius:20px;
+}
+.sheet-badge::before { content:''; width:6px; height:6px; background:var(--green); border-radius:50%; animation:pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.3)} }
 
-/* AI LOGOS */
-.ai-trio{display:flex;justify-content:center;gap:20px;margin:20px 0;flex-wrap:wrap}
-.ai-chip{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:700;letter-spacing:1px}
-.ai-chip.claude{background:var(--claude-dim);border:1px solid rgba(124,109,250,0.3);color:var(--claude)}
-.ai-chip.openai{background:var(--openai-dim);border:1px solid rgba(25,195,125,0.3);color:var(--openai)}
-.ai-chip.gemini{background:var(--gemini-dim);border:1px solid rgba(234,67,53,0.3);color:var(--gemini)}
-.ai-dot{width:8px;height:8px;border-radius:50%}
+/* Chat */
+.chat-container {
+  background:var(--white); border-radius:24px;
+  box-shadow:var(--shadow-lg); overflow:hidden; border:1px solid var(--border);
+}
 
-/* CARDS */
-.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
-.card-title{font-family:'Oxanium',sans-serif;font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;font-weight:600}
+/* Header */
+.chat-header {
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  padding:16px 20px; display:flex; align-items:center; gap:12px; position:relative; overflow:hidden;
+}
+.chat-header::before { content:''; position:absolute; top:-30px; right:-30px; width:100px; height:100px; background:rgba(255,255,255,0.07); border-radius:50%; }
+.bot-avatar {
+  width:42px; height:42px; border-radius:14px;
+  background:rgba(255,255,255,0.2); border:2px solid rgba(255,255,255,0.35);
+  display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
+}
+.header-info .bot-name { font-size:15px; font-weight:700; color:white; }
+.header-info .bot-status { font-size:11px; color:rgba(255,255,255,0.8); display:flex; align-items:center; gap:5px; margin-top:2px; }
+.status-dot { width:6px; height:6px; background:#4ade80; border-radius:50%; }
 
-/* KEYS */
-.keys-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
-label{font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:5px}
-input,select,textarea{width:100%;background:#080a14;border:1px solid var(--border);border-radius:6px;padding:9px 12px;color:var(--text);font-size:13px;font-family:'Rajdhani',sans-serif}
-input:focus,select:focus,textarea:focus{outline:1px solid rgba(245,200,66,0.3)}
-.key-field.claude input{border-color:rgba(124,109,250,0.2)}
-.key-field.openai input{border-color:rgba(25,195,125,0.2)}
-.key-field.gemini input{border-color:rgba(234,67,53,0.2)}
+/* Body */
+.chat-body {
+  height:430px; overflow-y:auto; padding:16px 14px;
+  display:flex; flex-direction:column; gap:10px;
+  background:#fafbff; scroll-behavior:smooth;
+}
+.chat-body::-webkit-scrollbar { width:4px; }
+.chat-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 
-/* MATCH INPUT */
-.match-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:14px}
-.vs-box{font-family:'Oxanium',sans-serif;font-size:20px;font-weight:800;color:var(--muted);text-align:center;padding-top:20px}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+/* Mensajes */
+.msg-row { display:flex; flex-direction:column; gap:3px; animation:fadeUp .22s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
+.msg-row.bot { align-items:flex-start; }
+.msg-row.user { align-items:flex-end; }
+.bubble {
+  max-width:83%; padding:10px 14px; border-radius:16px;
+  font-size:13.5px; line-height:1.55;
+}
+.bot .bubble {
+  background:var(--white); color:var(--text);
+  border:1px solid var(--border); border-bottom-left-radius:4px;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+}
+.user .bubble {
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white; border-bottom-right-radius:4px;
+}
+.msg-time { font-size:10px; color:var(--light); font-family:'DM Mono',monospace; padding:0 4px; }
 
-/* BUTTONS */
-.btn{padding:9px 18px;border-radius:6px;border:none;cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;transition:all 0.2s}
-.btn-save{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--muted)}
-.btn-save:hover{border-color:rgba(255,255,255,0.15);color:var(--text)}
-.btn-battle{width:100%;padding:16px;border-radius:8px;border:none;cursor:pointer;font-family:'Oxanium',sans-serif;font-weight:800;font-size:16px;letter-spacing:2px;text-transform:uppercase;background:linear-gradient(135deg,var(--claude),var(--openai),var(--gemini));color:#fff;transition:all 0.2s;position:relative;overflow:hidden}
-.btn-battle:disabled{background:#1a1d2e;color:var(--muted);cursor:not-allowed}
-.btn-battle:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 30px rgba(124,109,250,0.2)}
-.btn-battle::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--gemini),var(--openai),var(--claude));opacity:0;transition:opacity 0.5s}
-.btn-battle:hover:not(:disabled)::before{opacity:1}
-.btn-battle span{position:relative;z-index:1}
+/* Typing */
+.typing { display:flex; align-items:center; gap:4px; padding:10px 14px; background:var(--white); border:1px solid var(--border); border-radius:16px; border-bottom-left-radius:4px; width:fit-content; }
+.typing span { width:6px; height:6px; background:var(--light); border-radius:50%; animation:bounce 1.2s infinite; }
+.typing span:nth-child(2){animation-delay:.2s} .typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
 
-/* SPORT TABS */
-.sport-tabs{display:flex;gap:8px;margin-bottom:16px}
-.sport-btn{flex:1;padding:9px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;transition:all 0.2s}
-.sport-btn.active{border-color:var(--gold);background:rgba(245,200,66,0.08);color:var(--gold)}
+/* ── MENÚ PRINCIPAL ── */
+.menu-card {
+  background:var(--white); border:1px solid var(--border);
+  border-radius:16px; border-bottom-left-radius:4px;
+  overflow:hidden; max-width:88%;
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+  animation:fadeUp .22s ease;
+}
+.menu-title {
+  padding:11px 14px; font-size:12px; font-weight:700;
+  color:var(--muted); border-bottom:1px solid var(--border);
+  background:#fafbff; letter-spacing:0.04em;
+  display:flex; align-items:center; gap:6px;
+}
+.menu-item {
+  display:flex; align-items:center; gap:10px;
+  padding:11px 14px; cursor:pointer;
+  border-bottom:1px solid #f1f5f9;
+  transition:background .13s; font-size:13.5px; font-weight:500;
+  color:var(--text);
+}
+.menu-item:last-child { border-bottom:none; }
+.menu-item:hover { background:var(--accent-light); color:var(--accent); }
+.menu-item:hover .menu-arrow { opacity:1; transform:translateX(2px); }
+.menu-item-icon { font-size:16px; width:22px; text-align:center; flex-shrink:0; }
+.menu-item-text { flex:1; }
+.menu-item-sub { font-size:11px; color:var(--light); font-weight:400; margin-top:1px; }
+.menu-arrow { font-size:12px; color:var(--light); opacity:0; transition:all .13s; }
 
-/* BATTLE ARENA */
-.battle-arena{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px}
-.ai-card{border-radius:12px;padding:16px;position:relative;overflow:hidden;transition:all 0.3s}
-.ai-card.claude-card{background:var(--claude-dim);border:1px solid rgba(124,109,250,0.25)}
-.ai-card.openai-card{background:var(--openai-dim);border:1px solid rgba(25,195,125,0.25)}
-.ai-card.gemini-card{background:var(--gemini-dim);border:1px solid rgba(234,67,53,0.25)}
-.ai-card.winner{transform:scale(1.02)}
-.ai-card.winner::before{content:'👑 GANADOR';position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;letter-spacing:1px;color:var(--gold)}
-.ai-name{font-family:'Oxanium',sans-serif;font-size:13px;font-weight:800;letter-spacing:2px;margin-bottom:12px}
-.ai-name.claude{color:var(--claude)}
-.ai-name.openai{color:var(--openai)}
-.ai-name.gemini{color:var(--gemini)}
-.ai-pred{font-family:'Oxanium',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.2}
-.ai-conf{font-size:38px;font-family:'Oxanium',sans-serif;font-weight:800;line-height:1}
-.ai-conf.claude{color:var(--claude)}
-.ai-conf.openai{color:var(--openai)}
-.ai-conf.gemini{color:var(--gemini)}
-.ai-nivel{font-size:10px;letter-spacing:2px;font-weight:700;margin-top:4px;margin-bottom:10px}
-.ai-reasoning{font-size:11px;color:rgba(255,255,255,0.5);line-height:1.6;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;margin-top:6px}
-.ai-loading{text-align:center;padding:20px 0;color:var(--muted);font-size:12px}
-.ai-error{font-size:11px;color:#f87171;padding:8px 0}
+/* ── BOTONES DE NAVEGACIÓN ── */
+.nav-btns {
+  display:flex; gap:7px; flex-wrap:wrap; margin-top:2px;
+  animation:fadeUp .25s ease;
+}
+.nav-btn {
+  font-size:12px; font-weight:600; font-family:'Plus Jakarta Sans',sans-serif;
+  padding:6px 13px; border-radius:20px; cursor:pointer; transition:all .14s;
+  border:1.5px solid var(--border); background:var(--white); color:var(--muted);
+  display:flex; align-items:center; gap:5px;
+}
+.nav-btn:hover { background:var(--accent-light); border-color:var(--accent); color:var(--accent); }
+.nav-btn.primary { border-color:var(--accent); color:var(--accent); }
+.nav-btn.primary:hover { background:var(--accent); color:white; }
 
-/* CONSENSUS */
-.consensus-card{background:linear-gradient(135deg,rgba(124,109,250,0.06),rgba(25,195,125,0.06),rgba(234,67,53,0.06));border:1px solid rgba(245,200,66,0.2);border-radius:12px;padding:20px;margin-bottom:14px}
-.consensus-title{font-family:'Oxanium',sans-serif;font-size:11px;color:var(--gold);letter-spacing:3px;text-transform:uppercase;margin-bottom:16px;font-weight:700}
-.consensus-pred{font-family:'Oxanium',sans-serif;font-size:clamp(18px,3vw,26px);font-weight:800;color:#fff;margin-bottom:8px}
-.consensus-conf{font-size:52px;font-family:'Oxanium',sans-serif;font-weight:800;color:var(--gold);line-height:1}
-.agreement-bar{margin-top:14px}
-.agreement-label{font-size:11px;color:var(--muted);margin-bottom:6px;letter-spacing:1px}
-.agreement-track{height:6px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden}
-.agreement-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--claude),var(--openai),var(--gemini));transition:width 1s ease}
-.prob-row-consensus{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.prob-label{font-size:12px;color:var(--muted);width:120px;flex-shrink:0}
-.prob-track{flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden}
-.prob-fill{height:100%;border-radius:3px;background:var(--gold)}
-.prob-val{font-size:13px;font-family:'Oxanium',sans-serif;font-weight:700;color:var(--gold);width:40px;text-align:right}
+/* ── FORMULARIO TURNO ── */
+.turno-form {
+  background:var(--white); border:1.5px solid var(--border);
+  border-radius:16px; border-bottom-left-radius:4px; padding:16px;
+  max-width:90%; animation:fadeUp .25s ease;
+}
+.turno-form h4 { font-size:13px; font-weight:700; color:var(--text); margin-bottom:12px; }
+.form-field { margin-bottom:10px; }
+.form-field label { font-size:10px; font-weight:700; color:var(--muted); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:.06em; }
+.form-field input, .form-field select {
+  width:100%; border:1.5px solid var(--border); border-radius:9px;
+  padding:8px 11px; font-size:13px; font-family:'Plus Jakarta Sans',sans-serif;
+  color:var(--text); outline:none; transition:border-color .15s; background:#fafbff;
+}
+.form-field input:focus, .form-field select:focus { border-color:var(--accent); background:white; }
+.form-submit {
+  width:100%; background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:white; border:none; border-radius:9px; padding:10px;
+  font-size:13px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;
+  cursor:pointer; margin-top:4px; transition:opacity .15s,transform .15s;
+}
+.form-submit:hover { opacity:.92; transform:translateY(-1px); }
 
-/* MISC */
-.error-box{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:10px 14px;color:#fca5a5;font-size:13px;margin-bottom:12px;display:none}
-.info-note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.6}
-.keys-ok{font-size:12px;color:var(--openai);margin-left:10px;display:none}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.1);border-top-color:currentColor;border-radius:50%;animation:spin 0.8s linear infinite;vertical-align:middle;margin-right:6px}
+/* Confirm card */
+.confirm-card {
+  background:var(--green-light); border:1.5px solid rgba(5,150,105,0.25);
+  border-radius:14px; padding:14px; max-width:90%; animation:fadeUp .25s ease;
+}
+.confirm-card h4 { font-size:13px; font-weight:700; color:var(--green); margin-bottom:8px; }
+.confirm-detail { font-size:12px; color:#065f46; line-height:1.9; font-family:'DM Mono',monospace; }
 
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+/* ── FOOTER INPUT ── */
+.chat-footer {
+  padding:12px 14px; border-top:1px solid var(--border);
+  display:flex; gap:8px; align-items:center; background:var(--white);
+}
+#userInput {
+  flex:1; border:1.5px solid var(--border); border-radius:14px;
+  padding:10px 14px; font-size:13px; font-family:'Plus Jakarta Sans',sans-serif;
+  color:var(--text); outline:none; transition:border-color .15s; background:#fafbff;
+}
+#userInput:focus { border-color:var(--accent); background:white; }
+#userInput::placeholder { color:var(--light); }
+.send-btn {
+  width:40px; height:40px; border-radius:12px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  color:white; font-size:15px; transition:transform .15s; flex-shrink:0;
+}
+.send-btn:hover { transform:scale(1.08); }
 
-.result-wrap{animation:fadeIn 0.5s ease}
-::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#1a1d2e;border-radius:2px}
-@media(max-width:600px){.keys-grid{grid-template-columns:1fr}.battle-arena{grid-template-columns:1fr}.match-grid{grid-template-columns:1fr auto 1fr}.grid-2{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr 1fr}}
+/* Sheet viewer */
+.sheet-viewer { margin-top:14px; background:var(--white); border:1px solid var(--border); border-radius:14px; overflow:hidden; box-shadow:var(--shadow); }
+.sheet-tabs { display:flex; border-bottom:1px solid var(--border); background:#f8fafc; overflow-x:auto; }
+.sheet-tab { padding:9px 14px; font-size:12px; font-weight:600; color:var(--muted); cursor:pointer; white-space:nowrap; border-bottom:2px solid transparent; transition:all .15s; }
+.sheet-tab.active { color:var(--accent); border-bottom-color:var(--accent); background:white; }
+.sheet-content { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { background:#f1f5f9; padding:8px 12px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--muted); border-bottom:1px solid var(--border); }
+td { padding:8px 12px; border-bottom:1px solid #f1f5f9; color:var(--text); font-family:'DM Mono',monospace; font-size:11px; }
+tr:last-child td { border-bottom:none; }
+tr:hover td { background:var(--accent-light); }
+.badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:700; }
+.badge.pending { background:#fef3c7; color:#92400e; }
+.badge.confirmed { background:var(--green-light); color:var(--green); }
 </style>
 </head>
 <body>
-<div class="container">
+<div class="wrapper">
 
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-badge">⚔️ Modo Batalla</div>
-    <h1><span class="title-ai">AI</span><br><span class="title-battle">BATTLE</span></h1>
-    <p class="subtitle">3 inteligencias · 1 pronóstico</p>
-    <div class="ai-trio">
-      <div class="ai-chip claude"><div class="ai-dot" style="background:var(--claude)"></div>CLAUDE</div>
-      <div class="ai-chip openai"><div class="ai-dot" style="background:var(--openai)"></div>CHATGPT</div>
-      <div class="ai-chip gemini"><div class="ai-dot" style="background:var(--gemini)"></div>GEMINI</div>
+  <div class="info-bar">
+    <span>🔗 Respuestas desde <strong>Google Sheets</strong></span>
+    <span class="sheet-badge">● Conectado</span>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="bot-avatar">🤖</div>
+      <div class="header-info">
+        <div class="bot-name">Asistente Virtual</div>
+        <div class="bot-status"><span class="status-dot"></span> En línea · responde al instante</div>
+      </div>
+    </div>
+    <div class="chat-body" id="chatBody"></div>
+    <div class="chat-footer">
+      <input type="text" id="userInput" placeholder="O escribí tu consulta..."
+        onkeydown="if(event.key==='Enter') handleFreeText()" />
+      <button class="send-btn" onclick="handleFreeText()">➤</button>
     </div>
   </div>
 
-  <!-- KEYS -->
-  <div class="card">
-    <div class="card-title">⚙️ API Keys</div>
-    <div class="keys-grid">
-      <div class="key-field claude">
-        <label style="color:var(--claude)">🟣 Claude (Anthropic)</label>
-        <input type="password" id="key-claude" placeholder="sk-ant-api03-..."/>
-        <div class="info-note">platform.claude.com/settings/keys</div>
-      </div>
-      <div class="key-field openai">
-        <label style="color:var(--openai)">🟢 ChatGPT (OpenAI)</label>
-        <input type="password" id="key-openai" placeholder="sk-..."/>
-        <div class="info-note">platform.openai.com/api-keys</div>
-      </div>
-      <div class="key-field gemini">
-        <label style="color:var(--gemini)">🔴 Gemini (Google)</label>
-        <input type="password" id="key-gemini" placeholder="AIza..."/>
-        <div class="info-note">aistudio.google.com/apikey</div>
-      </div>
+  <div class="sheet-viewer">
+    <div class="sheet-tabs">
+      <div class="sheet-tab active" onclick="showTab('respuestas',this)">📋 Respuestas Bot</div>
+      <div class="sheet-tab" onclick="showTab('turnos',this)">📅 Turnos</div>
     </div>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-      <label style="color:var(--gold)">⚡ RapidAPI Key (para buscar partidos automáticamente)</label>
-      <input type="password" id="key-rapidapi" placeholder="d270be..."/>
-      <div class="info-note">rapidapi.com → tu key universal · Ya la tenés: d270be1053msh...</div>
-    </div>
-    <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      <button class="btn btn-save" onclick="saveKeys()">💾 Guardar Keys</button>
-      <span class="keys-ok" id="keys-ok">✓ Guardadas</span>
-    </div>
+    <div class="sheet-content" id="sheetContent"></div>
   </div>
-
-  <!-- BUSCAR PARTIDOS -->
-  <div class="card">
-    <div class="card-title">🔍 Buscar Partidos</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-      <div>
-        <label>Liga</label>
-        <select id="league-search">
-          <option value="253">Champions League</option>
-          <option value="39">Premier League</option>
-          <option value="140">La Liga</option>
-          <option value="135">Serie A</option>
-          <option value="78">Bundesliga</option>
-          <option value="61">Ligue 1</option>
-          <option value="128">Liga Argentina</option>
-          <option value="13">Copa Libertadores</option>
-          <option value="71">Brasileirao</option>
-        </select>
-      </div>
-      <div>
-        <label>Rango</label>
-        <select id="date-range-search">
-          <option value="0">Hoy</option>
-          <option value="1">Mañana</option>
-          <option value="3" selected>Próximos 3 días</option>
-          <option value="7">Próximos 7 días</option>
-        </select>
-      </div>
-    </div>
-    <button class="btn btn-save" style="width:100%;margin-bottom:12px;padding:11px;color:var(--gold);border-color:rgba(245,200,66,0.3)" onclick="searchMatches()">🔄 Buscar Partidos</button>
-    <div id="matches-list"></div>
-  </div>
-
-  <!-- PARTIDO -->
-  <div class="card">
-    <div class="card-title">🏟️ Configurar Partido</div>
-    <div class="sport-tabs">
-      <button class="sport-btn active" onclick="setSport('football',this)">⚽ Fútbol</button>
-      <button class="sport-btn" onclick="setSport('basketball',this)">🏀 Basketball</button>
-      <button class="sport-btn" onclick="setSport('tennis',this)">🎾 Tenis</button>
-    </div>
-
-    <div class="match-grid">
-      <div>
-        <label>🏠 Local</label>
-        <input id="home-team" placeholder="Ej: Real Madrid"/>
-      </div>
-      <div class="vs-box">VS</div>
-      <div>
-        <label>✈️ Visitante</label>
-        <input id="away-team" placeholder="Ej: Barcelona"/>
-      </div>
-    </div>
-
-    <div class="grid-2">
-      <div>
-        <label>Liga / Competición</label>
-        <input id="league" placeholder="Ej: Champions League"/>
-      </div>
-      <div>
-        <label>Tipo de Pronóstico</label>
-        <select id="pred-type"></select>
-      </div>
-    </div>
-
-    <div class="grid-3" id="stats-section">
-      <div>
-        <label>Forma LOCAL</label>
-        <select id="home-form">
-          <option>GGGGG</option><option>GGGGP</option><option>GGGPP</option>
-          <option selected>GGPPP</option><option>GPPPP</option><option>PPPPP</option>
-          <option>GGGGE</option><option>GGGEP</option><option>GGEPP</option>
-        </select>
-      </div>
-      <div>
-        <label>Forma VISITANTE</label>
-        <select id="away-form">
-          <option>GGGGG</option><option>GGGGP</option><option>GGGPP</option>
-          <option selected>GGPPP</option><option>GPPPP</option><option>PPPPP</option>
-          <option>GGGGE</option><option>GGGEP</option><option>GGEPP</option>
-        </select>
-      </div>
-      <div>
-        <label>Contexto extra</label>
-        <input id="extra-ctx" placeholder="Lesiones, clima, h2h..."/>
-      </div>
-    </div>
-
-    <div class="error-box" id="error-box"></div>
-    <button class="btn-battle" id="btn-battle" onclick="startBattle()">
-      <span id="btn-text">⚔️ INICIAR BATALLA DE IAs</span>
-    </button>
-  </div>
-
-  <!-- RESULTADO -->
-  <div id="result-section"></div>
 
 </div>
-
 <script>
-const PRED_TYPES = {
-  football: ['Resultado 1X2','Over/Under 2.5 Goles','Ambos Equipos Marcan','Doble Oportunidad'],
-  basketball: ['Resultado 1X2','Over/Under Puntos','Handicap'],
-  tennis: ['Ganador','Over/Under Sets','Set Handicap']
+// ═══════════════════════════════════════════
+// ⚙️ URL DEL APPS SCRIPT — conectado al Google Sheet real
+// ═══════════════════════════════════════════
+const APPS_SCRIPT_URL = "https://chatbot-turnos-proxy.matiascastroa45.workers.dev";
+
+// ═══════════════════════════════════════════
+// DATOS — en producción se leen del Google Sheet con fetch()
+// ═══════════════════════════════════════════
+const SHEET = {
+  keywords: [
+    { kw:"hola",       resp:"¡Hola! 👋 ¿En qué te puedo ayudar?" },
+    { kw:"gracias",    resp:"¡De nada! 😊 ¿Necesitás algo más?" },
+    { kw:"horario",    resp:"Lunes a Viernes 9–18hs · Sábados 9–13hs 🕐" },
+    { kw:"precio",     resp:"Corte $X · Tinte $Y · Mechas $Z 💰" },
+    { kw:"ubicacion",  resp:"Av. Corrientes 1234, CABA 📍 A media cuadra del subte B." },
+    { kw:"pago",       resp:"Aceptamos efectivo, débito y crédito 💳" },
+    { kw:"estacion",   resp:"Subte línea B, estación Uruguay 🚇" },
+    { kw:"telefono",   resp:"Llamanos al 011-XXXX-XXXX 📞" },
+  ],
+  turnos: []
 };
-let currentSport = 'football';
 
-window.onload = () => { loadKeys(); updatePredTypes(); };
-
-function loadKeys() {
-  ['claude','openai','gemini','rapidapi'].forEach(k => {
-    const v = localStorage.getItem('aib_' + k);
-    if(v) { const el = document.getElementById('key-' + k); if(el) el.value = v; }
-  });
-  const anyKey = ['claude','openai','gemini'].some(k => localStorage.getItem('aib_' + k));
-  if(anyKey) document.getElementById('keys-ok').style.display = 'inline';
-}
-
-function saveKeys() {
-  ['claude','openai','gemini','rapidapi'].forEach(k => {
-    const el = document.getElementById('key-' + k);
-    if(el) { const v = el.value.trim(); if(v) localStorage.setItem('aib_' + k, v); }
-  });
-  document.getElementById('keys-ok').style.display = 'inline';
-}
-
-function getKey(k) { 
-  const el = document.getElementById('key-' + k);
-  return localStorage.getItem('aib_' + k) || (el ? el.value.trim() : ''); 
-}
-
-// ─── SEARCH MATCHES via RapidAPI ─────────────────────
-async function searchMatches() {
-  const rk = getKey('rapidapi');
-  if(!rk) { 
-    document.getElementById('matches-list').innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">Ingresá tu RapidAPI Key arriba para buscar partidos automáticamente.</div>'; 
-    return; 
+// ═══════════════════════════════════════════
+// ÁRBOL DE MENÚS
+// ═══════════════════════════════════════════
+const MENUS = {
+  main: {
+    title: "¿Sobre qué querés consultar?",
+    items: [
+      { icon:"✂️", label:"Servicios",    sub:"Cortes, tintes, mechas...", next:"servicios" },
+      { icon:"📅", label:"Turnos",       sub:"Reservar o consultar turno", next:"turnos" },
+      { icon:"💰", label:"Precios",      sub:"Conocé nuestras tarifas", next:"precios" },
+      { icon:"📍", label:"Ubicación",    sub:"Cómo llegar", next:"ubicacion" },
+      { icon:"💬", label:"Hablar con un asesor", sub:"Abrimos WhatsApp ahora", next:"whatsapp" },
+    ]
+  },
+  servicios: {
+    title: "Nuestros servicios",
+    items: [
+      { icon:"✂️", label:"Corte de cabello", sub:"Desde $X", next:"info_corte" },
+      { icon:"🎨", label:"Tinte",            sub:"Desde $Y", next:"info_tinte" },
+      { icon:"✨", label:"Mechas",           sub:"Desde $Z", next:"info_mechas" },
+      { icon:"🪒", label:"Barba",            sub:"Desde $W", next:"info_barba" },
+    ]
+  },
+  turnos: {
+    title: "Turnos",
+    items: [
+      { icon:"📝", label:"Reservar un turno", sub:"Completá el formulario", next:"form_turno" },
+      { icon:"🔍", label:"Consultar mi turno", sub:"Ingresá tu teléfono", next:"info_consultar" },
+    ]
+  },
+  precios: {
+    title: "Nuestros precios",
+    items: [
+      { icon:"✂️", label:"Corte",   sub:"$X", next:"info_corte" },
+      { icon:"🎨", label:"Tinte",   sub:"$Y", next:"info_tinte" },
+      { icon:"✨", label:"Mechas",  sub:"$Z", next:"info_mechas" },
+      { icon:"🪒", label:"Barba",   sub:"$W", next:"info_barba" },
+    ]
+  },
+  ubicacion: {
+    title: "Cómo llegar",
+    items: [
+      { icon:"🗺️",  label:"Ver en Google Maps", sub:"Av. Corrientes 1234", next:"info_maps" },
+      { icon:"🚇",  label:"En subte",            sub:"Línea B — Estación Uruguay", next:"info_subte" },
+      { icon:"🚗",  label:"En auto",             sub:"Estacionamiento en la cuadra", next:"info_auto" },
+    ]
   }
-  
-  const leagueId = document.getElementById('league-search').value;
-  const days = parseInt(document.getElementById('date-range-search').value);
-  const list = document.getElementById('matches-list');
-  list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:12px 0"><span class="spinner" style="color:var(--gold)"></span> Buscando partidos...</div>';
+};
 
-  // Generate dates
-  const dates = [];
-  for(let i = 0; i <= days; i++) {
-    const d = new Date(); d.setDate(d.getDate() + i);
-    dates.push(d.toISOString().split('T')[0]);
+// Info de hojas finales (sin submenú)
+const INFO = {
+  info_corte:     "✂️ <strong>Corte de cabello</strong><br>Desde $X · Duración aprox. 30 min<br>Incluye lavado y secado.",
+  info_tinte:     "🎨 <strong>Tinte</strong><br>Desde $Y según largo y técnica.<br>Duración aprox. 60-90 min.",
+  info_mechas:    "✨ <strong>Mechas</strong><br>Desde $Z · Varias técnicas disponibles.<br>Duración aprox. 90-120 min.",
+  info_barba:     "🪒 <strong>Barba</strong><br>Desde $W · Perfilado y afeitado.<br>Duración aprox. 20 min.",
+  info_maps:      "📍 <a href='#' style='color:var(--accent)'>Av. Corrientes 1234, CABA</a><br>A media cuadra del subte B.",
+  info_subte:     "🚇 Tomá la <strong>línea B</strong> hasta estación <strong>Uruguay</strong>. Salida por Av. Corrientes, caminá 100m hacia el Este.",
+  info_auto:      "🚗 Hay estacionamiento en la cuadra. También podés usar los parquímetros de Av. Corrientes.",
+  info_consultar: `
+    <div style="background:#f0fdf4;border-radius:10px;padding:12px 14px;border:1px solid rgba(5,150,105,0.2);">
+      <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:8px;">💬 Consultar mi turno</div>
+      <div style="font-size:12px;color:#047857;margin-bottom:12px;line-height:1.5;">
+        Escribinos por WhatsApp y te confirmamos el estado de tu turno.
+      </div>
+      <a href="https://wa.me/5491135140131?text=${encodeURIComponent('Hola! Quiero consultar el estado de mi turno 📅')}"
+        target="_blank"
+        style="display:block;background:#25d366;color:white;text-align:center;padding:9px;border-radius:9px;font-size:13px;font-weight:700;text-decoration:none;">
+        📲 Abrir WhatsApp
+      </a>
+    </div>`,
+};
+
+// ═══════════════════════════════════════════
+// ESTADO DE NAVEGACIÓN
+// ═══════════════════════════════════════════
+let navStack = []; // historial: ["main", "servicios", ...]
+let currentScreen = "main";
+
+function isAtMain() { return currentScreen === "main"; }
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function now() {
+  return new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+}
+
+function scrollBottom() {
+  const b = document.getElementById('chatBody');
+  setTimeout(()=>{ b.scrollTop = b.scrollHeight; }, 80);
+}
+
+function addUserBubble(text) {
+  const b = document.getElementById('chatBody');
+  const d = document.createElement('div');
+  d.className = 'msg-row user';
+  d.innerHTML = `<div class="bubble">${text}</div><span class="msg-time">${now()}</span>`;
+  b.appendChild(d);
+  scrollBottom();
+}
+
+function withTyping(delay, fn) {
+  const b = document.getElementById('chatBody');
+  const t = document.createElement('div');
+  t.className = 'msg-row bot'; t.id = 'typing-ind';
+  t.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
+  b.appendChild(t); scrollBottom();
+  setTimeout(()=>{ const el = document.getElementById('typing-ind'); if(el) el.remove(); fn(); scrollBottom(); }, delay);
+}
+
+// Botones de navegación: "← Atrás" solo si no estamos en main, "🏠 Menú" siempre
+function addNavBtns() {
+  const b = document.getElementById('chatBody');
+  const d = document.createElement('div');
+  d.className = 'nav-btns';
+  if (!isAtMain()) {
+    d.innerHTML += `<button class="nav-btn primary" onclick="goBack()">← Atrás</button>`;
+  }
+  d.innerHTML += `<button class="nav-btn" onclick="goHome()">🏠 Menú principal</button>`;
+  b.appendChild(d);
+  scrollBottom();
+}
+
+// ═══════════════════════════════════════════
+// NAVEGACIÓN
+// ═══════════════════════════════════════════
+function navigate(screen, labelClicked) {
+  if (labelClicked) addUserBubble(labelClicked);
+
+  // Guardar en historial
+  if (currentScreen !== screen) {
+    navStack.push(currentScreen);
+    currentScreen = screen;
   }
 
-  try {
-    let allFixtures = [];
-    for(const date of dates) {
-      const res = await fetch(`https://v3.football.api-sports.io/fixtures?league=${leagueId}&date=${date}&season=2025`, {
-        headers: {
-          'x-rapidapi-key': rk,
-          'x-rapidapi-host': 'v3.football.api-sports.io'
-        }
-      });
-      const data = await res.json();
-      if(data.response) allFixtures = allFixtures.concat(data.response);
-    }
+  withTyping(600, () => {
+    // Formulario de turno
+    if (screen === 'form_turno') { showTurnoForm(); return; }
+    // Asesor
+    if (screen === 'whatsapp') { showWhatsApp(); return; }
+    // Info final (sin submenú)
+    if (INFO[screen]) { showInfo(screen); return; }
+    // Submenú
+    if (MENUS[screen]) { showMenu(screen); return; }
+  });
+}
 
-    allFixtures.sort((a,b) => new Date(a.fixture.date) - new Date(b.fixture.date));
+function goBack() {
+  if (navStack.length === 0) { goHome(); return; }
+  const prev = navStack.pop();
+  currentScreen = prev;
+  addUserBubble('← Atrás');
+  withTyping(400, () => {
+    if (MENUS[currentScreen]) showMenu(currentScreen);
+    else showInfo(currentScreen);
+  });
+}
 
-    if(!allFixtures.length) {
-      list.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:8px 0">😕 No hay partidos en este período. Probá otra liga o más días.</div>';
-      return;
-    }
+function goHome() {
+  navStack = [];
+  currentScreen = 'main';
+  addUserBubble('🏠 Menú principal');
+  withTyping(400, () => showMenu('main'));
+}
 
-    // Group by date
-    const grouped = {};
-    allFixtures.forEach(f => {
-      const dk = new Date(f.fixture.date).toLocaleDateString('es-AR',{weekday:'long',day:'numeric',month:'long'});
-      if(!grouped[dk]) grouped[dk] = [];
-      grouped[dk].push(f);
-    });
+// ═══════════════════════════════════════════
+// RENDERS
+// ═══════════════════════════════════════════
+function showMenu(screen) {
+  const menu = MENUS[screen];
+  const b = document.getElementById('chatBody');
 
-    let html = '';
-    Object.entries(grouped).forEach(([dateLabel, fixtures]) => {
-      html += `<div style="font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin:12px 0 6px;padding-left:4px">${dateLabel}</div>`;
-      html += fixtures.slice(0,8).map(f => {
-        const home = f.teams.home.name;
-        const away = f.teams.away.name;
-        const time = new Date(f.fixture.date).toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
-        const status = f.fixture.status.short;
-        const statusLabel = status==='NS' ? `🕐 ${time}hs` : status==='FT' ? '✅ Final' : '🔴 En juego';
-        return `<div onclick="selectMatch('${home.replace(/'/g,"\'")}','${away.replace(/'/g,"\'")}','${f.league.name}')" 
-          style="background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:all 0.2s"
-          onmouseover="this.style.borderColor='rgba(245,200,66,0.3)';this.style.background='rgba(245,200,66,0.04)'"
-          onmouseout="this.style.borderColor='var(--border)';this.style.background='rgba(255,255,255,0.02)'">
-          <div>
-            <div style="font-size:14px;font-weight:700;color:var(--text)">${home} <span style="color:var(--muted)">vs</span> ${away}</div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">${f.league.name}</div>
-          </div>
-          <div style="font-size:12px;color:var(--gold);font-family:'Oxanium',sans-serif;font-weight:700">${statusLabel}</div>
-        </div>`;
-      }).join('');
-    });
+  const card = document.createElement('div');
+  card.className = 'msg-row bot';
 
-    list.innerHTML = html;
-  } catch(e) {
-    list.innerHTML = `<div style="font-size:12px;color:#f87171;padding:8px 0">❌ Error: ${e.message}</div>`;
+  const menuEl = document.createElement('div');
+  menuEl.className = 'menu-card';
+  menuEl.innerHTML = `<div class="menu-title">📌 ${menu.title}</div>`;
+
+  menu.items.forEach(item => {
+    const el = document.createElement('div');
+    el.className = 'menu-item';
+    el.innerHTML = `
+      <span class="menu-item-icon">${item.icon}</span>
+      <span class="menu-item-text">
+        <div>${item.label}</div>
+        ${item.sub ? `<div class="menu-item-sub">${item.sub}</div>` : ''}
+      </span>
+      <span class="menu-arrow">›</span>`;
+    el.onclick = () => navigate(item.next, item.label);
+    menuEl.appendChild(el);
+  });
+
+  card.appendChild(menuEl);
+  const time = document.createElement('span');
+  time.className = 'msg-time'; time.textContent = now();
+  card.appendChild(time);
+  b.appendChild(card);
+
+  // Solo mostrar "Menú principal" si no es el main
+  if (screen !== 'main') {
+    const nav = document.createElement('div');
+    nav.className = 'nav-btns';
+    nav.innerHTML = `<button class="nav-btn primary" onclick="goBack()">← Atrás</button>
+                     <button class="nav-btn" onclick="goHome()">🏠 Menú principal</button>`;
+    b.appendChild(nav);
   }
+
+  scrollBottom();
 }
 
-function selectMatch(home, away, league) {
-  document.getElementById('home-team').value = home;
-  document.getElementById('away-team').value = away;
-  document.getElementById('league').value = league;
-  document.querySelector('.card:nth-of-type(3)').scrollIntoView({behavior:'smooth', block:'start'});
-  // Flash the fields
-  ['home-team','away-team'].forEach(id => {
-    const el = document.getElementById(id);
-    el.style.borderColor = 'rgba(245,200,66,0.5)';
-    setTimeout(() => el.style.borderColor = '', 1000);
-  });
+function showInfo(screen) {
+  const b = document.getElementById('chatBody');
+  const d = document.createElement('div');
+  d.className = 'msg-row bot';
+  d.innerHTML = `<div class="bubble">${INFO[screen]}</div><span class="msg-time">${now()}</span>`;
+  b.appendChild(d);
+  addNavBtns();
 }
 
-function setSport(sport, btn) {
-  currentSport = sport;
-  document.querySelectorAll('.sport-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  updatePredTypes();
-  document.getElementById('stats-section').style.display = sport === 'tennis' ? 'none' : '';
+function showWhatsApp() {
+  // ⚙️ CONFIGURACIÓN — reemplazá con el número real del negocio
+  const WA_NUMBER = "5491135140131"; // formato: código país + número sin espacios ni +
+  const WA_MSG = encodeURIComponent("Hola! Vengo del chat de la web y necesito hablar con un asesor 👋");
+  const WA_URL = `https://wa.me/${WA_NUMBER}?text=${WA_MSG}`;
+
+  const b = document.getElementById('chatBody');
+  const d = document.createElement('div');
+  d.className = 'msg-row bot';
+  d.innerHTML = `<div class="bubble">¡Perfecto! Te conectamos con un asesor por WhatsApp 💬</div><span class="msg-time">${now()}</span>`;
+  b.appendChild(d);
+
+  setTimeout(() => {
+    const card = document.createElement('div');
+    card.className = 'msg-row bot';
+    card.innerHTML = `
+      <div class="bubble" style="background:#f0fdf4;border-color:rgba(5,150,105,0.25);padding:14px 16px;">
+        <div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:10px;">💬 Continuar por WhatsApp</div>
+        <div style="font-size:12px;color:#047857;margin-bottom:12px;line-height:1.5;">
+          Un asesor te va a atender ahora mismo.<br>Tocá el botón para abrir WhatsApp.
+        </div>
+        <a href="${WA_URL}" target="_blank"
+          style="display:block;background:#25d366;color:white;text-align:center;padding:10px;border-radius:10px;font-size:13px;font-weight:700;text-decoration:none;">
+          📲 Abrir WhatsApp
+        </a>
+      </div>
+      <span class="msg-time">${now()}</span>`;
+    b.appendChild(card);
+
+    const nav = document.createElement('div');
+    nav.className = 'nav-btns';
+    nav.innerHTML = `<button class="nav-btn" onclick="goHome()">🏠 Menú principal</button>`;
+    b.appendChild(nav);
+    scrollBottom();
+  }, 700);
 }
 
-function updatePredTypes() {
-  const sel = document.getElementById('pred-type');
-  sel.innerHTML = (PRED_TYPES[currentSport] || []).map(p => `<option>${p}</option>`).join('');
-}
-
-function showError(msg) {
-  const el = document.getElementById('error-box');
-  el.textContent = msg; el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 5000);
-}
-
-// ─── BUILD PROMPT ─────────────────────────────────────
-function buildPrompt(aiName) {
-  const home = document.getElementById('home-team').value.trim();
-  const away = document.getElementById('away-team').value.trim();
-  const league = document.getElementById('league').value.trim();
-  const predType = document.getElementById('pred-type').value;
-  const homeForm = document.getElementById('home-form')?.value || 'N/D';
-  const awayForm = document.getElementById('away-form')?.value || 'N/D';
-  const extra = document.getElementById('extra-ctx').value.trim();
-  const sport = {football:'Fútbol',basketball:'Basketball',tennis:'Tenis'}[currentSport];
-
-  return `Sos ${aiName}, un analista deportivo experto. Analizá este partido de forma INDEPENDIENTE y da tu pronóstico personal.
-
-DEPORTE: ${sport}
-COMPETICIÓN: ${league || 'No especificada'}
-PRONÓSTICO: ${predType}
-LOCAL: ${home}
-VISITANTE: ${away}
-FORMA LOCAL (G=ganó,E=empate,P=perdió): ${homeForm}
-FORMA VISITANTE: ${awayForm}
-${extra ? 'CONTEXTO: ' + extra : ''}
-
-Respondé ÚNICAMENTE con JSON válido (sin markdown):
-{"prediccion":"pronóstico principal conciso","confianza":número 1-100,"nivel":"ALTA" o "MEDIA" o "BAJA","probabilidades":[{"label":"opción 1","pct":número,"highlight":true},{"label":"opción 2","pct":número,"highlight":false},{"label":"opción 3","pct":número,"highlight":false}],"razonamiento":"2 oraciones con tu análisis","factor_clave":"el factor más determinante del partido"}`;
-}
-
-// ─── API CALLS ─────────────────────────────────────────
-async function callClaude(key) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-    body: JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:buildPrompt('Claude')}]})
-  });
-  const d = await res.json();
-  if(d.error) throw new Error(d.error.message);
-  return JSON.parse(d.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim());
-}
-
-async function callOpenAI(key) {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json','Authorization':'Bearer '+key},
-    body: JSON.stringify({model:'gpt-4o-mini',max_tokens:800,messages:[{role:'user',content:buildPrompt('ChatGPT')}]})
-  });
-  const d = await res.json();
-  if(d.error) throw new Error(d.error.message);
-  return JSON.parse(d.choices[0].message.content.replace(/```json|```/g,'').trim());
-}
-
-async function callGemini(key) {
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({contents:[{parts:[{text:buildPrompt('Gemini')}]}]})
-  });
-  const d = await res.json();
-  if(d.error) throw new Error(d.error.message);
-  const text = d.candidates[0].content.parts[0].text;
-  return JSON.parse(text.replace(/```json|```/g,'').trim());
-}
-
-// ─── BATTLE ───────────────────────────────────────────
-async function startBattle() {
-  const home = document.getElementById('home-team').value.trim();
-  const away = document.getElementById('away-team').value.trim();
-  if(!home || !away) { showError('Ingresá ambos equipos.'); return; }
-
-  const keys = {claude: getKey('claude'), openai: getKey('openai'), gemini: getKey('gemini')};
-  const available = Object.entries(keys).filter(([k,v]) => v);
-  if(!available.length) { showError('Ingresá al menos una API Key.'); return; }
-
-  const btn = document.getElementById('btn-battle');
-  const btnText = document.getElementById('btn-text');
-  btn.disabled = true;
-
-  // Show loading arena
-  const section = document.getElementById('result-section');
-  section.innerHTML = `<div class="result-wrap">
-    <div class="battle-arena">
-      ${keys.claude ? aiLoadingCard('claude','CLAUDE') : ''}
-      ${keys.openai ? aiLoadingCard('openai','CHATGPT') : ''}
-      ${keys.gemini ? aiLoadingCard('gemini','GEMINI') : ''}
+function showTurnoForm() {
+  const b = document.getElementById('chatBody');
+  const d = document.createElement('div');
+  d.className = 'msg-row bot';
+  d.innerHTML = `
+    <div class="turno-form">
+      <h4>📅 Reservar turno</h4>
+      <div class="form-field"><label>Tu nombre</label><input type="text" id="f_nombre" placeholder="Ej: Juan García"/></div>
+      <div class="form-field"><label>Servicio</label>
+        <select id="f_servicio">
+          <option value="">Seleccioná...</option>
+          <option>Corte</option><option>Tinte</option><option>Mechas</option><option>Corte + Barba</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Fecha</label>
+        <input type="date" id="f_fecha" onchange="cargarHorarios(this.value)"/>
+      </div>
+      <div class="form-field">
+        <label>Horario</label>
+        <select id="f_horario">
+          <option value="">Primero elegí una fecha...</option>
+        </select>
+      </div>
+      <div class="form-field"><label>Tu WhatsApp</label><input type="tel" id="f_tel" placeholder="1123456789"/></div>
+      <button class="form-submit" onclick="submitTurno()">✅ Confirmar turno</button>
     </div>
-  </div>`;
-  section.scrollIntoView({behavior:'smooth', block:'start'});
+    <span class="msg-time">${now()}</span>`;
+  b.appendChild(d);
 
-  const results = {};
-  const callers = {claude: callClaude, openai: callOpenAI, gemini: callGemini};
-
-  // Run all in parallel
-  const promises = available.map(async ([name, key]) => {
-    try {
-      const r = await callers[name](key);
-      results[name] = {ok: true, data: r};
-    } catch(e) {
-      results[name] = {ok: false, error: e.message};
-    }
-    // Update card as result comes in
-    updateAICard(name, results[name], home, away);
-  });
-
-  // Animate dots while loading
-  let dots = 0;
-  const iv = setInterval(() => {
-    dots = (dots + 1) % 4;
-    btnText.textContent = '⚔️ BATALLANDO' + '.'.repeat(dots);
-  }, 400);
-
-  await Promise.all(promises);
-  clearInterval(iv);
-
-  // Render consensus
-  const successful = Object.entries(results).filter(([k,v]) => v.ok).map(([k,v]) => ({name:k, data:v.data}));
-  if(successful.length > 0) renderConsensus(successful, home, away);
-
-  btn.disabled = false;
-  btnText.textContent = '⚔️ NUEVA BATALLA';
+  const nav = document.createElement('div');
+  nav.className = 'nav-btns';
+  nav.innerHTML = `<button class="nav-btn primary" onclick="goBack()">← Atrás</button>
+                   <button class="nav-btn" onclick="goHome()">🏠 Menú principal</button>`;
+  b.appendChild(nav);
+  scrollBottom();
 }
 
-function aiLoadingCard(name, label) {
-  const colors = {claude:'var(--claude)',openai:'var(--openai)',gemini:'var(--gemini)'};
-  return `<div class="ai-card ${name}-card" id="aicard-${name}">
-    <div class="ai-name ${name}">${label}</div>
-    <div class="ai-loading"><span class="spinner" style="color:${colors[name]}"></span><br>Analizando...</div>
-  </div>`;
+// Convierte fecha de yyyy-mm-dd (input HTML) a dd-mm-yyyy (formato del Sheet)
+function formatearFecha(fecha) {
+  const [anio, mes, dia] = fecha.split('-');
+  return `${dia}-${mes}-${anio}`;
 }
 
-function updateAICard(name, result, home, away) {
-  const card = document.getElementById('aicard-' + name);
-  if(!card) return;
-  const labels = {claude:'CLAUDE',openai:'CHATGPT',gemini:'GEMINI'};
-  const colors = {claude:'var(--claude)',openai:'var(--openai)',gemini:'var(--gemini)'};
-  const levelColors = {ALTA:'#22d3a0',MEDIA:'#f59e0b',BAJA:'#f87171'};
+// Consulta al Sheet los horarios libres para la fecha elegida
+function cargarHorarios(fecha) {
+  fecha = formatearFecha(fecha);
+  const select = document.getElementById('f_horario');
+  select.innerHTML = '<option value="">Cargando horarios...</option>';
 
-  if(!result.ok) {
-    card.innerHTML = `<div class="ai-name ${name}">${labels[name]}</div>
-      <div class="ai-error">❌ ${result.error?.slice(0,80) || 'Error'}</div>`;
-    return;
-  }
-  const r = result.data;
-  const lc = levelColors[r.nivel] || colors[name];
-
-  card.innerHTML = `
-    <div class="ai-name ${name}">${labels[name]}</div>
-    <div class="ai-pred">${r.prediccion}</div>
-    <div class="ai-conf ${name}">${r.confianza}%</div>
-    <div class="ai-nivel" style="color:${lc}">${r.nivel}</div>
-    ${(r.probabilidades||[]).map(p => `
-      <div style="margin-bottom:5px">
-        <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:2px">
-          <span style="color:${p.highlight ? colors[name] : 'var(--muted)'}">${p.label}</span>
-          <span style="color:${p.highlight ? colors[name] : 'var(--muted)'}">${p.pct}%</span>
-        </div>
-        <div style="height:3px;background:rgba(255,255,255,0.05);border-radius:2px">
-          <div style="width:${p.pct}%;height:100%;background:${p.highlight ? colors[name] : 'rgba(255,255,255,0.1)'};border-radius:2px"></div>
-        </div>
-      </div>`).join('')}
-    <div class="ai-reasoning">${r.razonamiento}</div>
-    ${r.factor_clave ? `<div style="margin-top:8px;font-size:10px;color:${colors[name]};letter-spacing:1px">🔑 ${r.factor_clave}</div>` : ''}`;
-  card.style.animation = 'fadeIn 0.4s ease';
-}
-
-function renderConsensus(results, home, away) {
-  // Average probabilities
-  const allProbs = {};
-  results.forEach(({data:r}) => {
-    (r.probabilidades||[]).forEach(p => {
-      if(!allProbs[p.label]) allProbs[p.label] = [];
-      allProbs[p.label].push(p.pct);
+  fetch(APPS_SCRIPT_URL + "?action=horarios&fecha=" + fecha)
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok && data.horarios.length > 0) {
+        select.innerHTML = '<option value="">Seleccioná un horario...</option>';
+        data.horarios.forEach(h => {
+          select.innerHTML += `<option value="${h}">${h}</option>`;
+        });
+      } else {
+        select.innerHTML = '<option value="">No hay horarios disponibles para este día</option>';
+      }
+    })
+    .catch(() => {
+      select.innerHTML = '<option value="">Error al cargar horarios</option>';
     });
-  });
-  const avgProbs = Object.entries(allProbs).map(([label, vals]) => ({
-    label, pct: Math.round(vals.reduce((a,b)=>a+b,0)/vals.length)
-  })).sort((a,b) => b.pct - a.pct);
-
-  // Avg confidence
-  const avgConf = Math.round(results.reduce((a,{data:r}) => a + r.confianza, 0) / results.length);
-
-  // Agreement: do they pick same main prediction?
-  const preds = results.map(({data:r}) => r.prediccion.toLowerCase());
-  const uniquePreds = new Set(preds.map(p => p.split(' ')[0]));
-  const agreement = Math.round((1 - (uniquePreds.size - 1) / Math.max(results.length, 1)) * 100);
-
-  // Best prediction (highest confidence)
-  const best = results.reduce((a,b) => a.data.confianza > b.data.confianza ? a : b);
-
-  // Who wins? (highest confidence)
-  const winnerName = best.name;
-  document.querySelectorAll('.ai-card').forEach(c => c.classList.remove('winner'));
-  const winCard = document.getElementById('aicard-' + winnerName);
-  if(winCard) winCard.classList.add('winner');
-
-  const consensusHtml = `
-    <div class="consensus-card result-wrap">
-      <div class="consensus-title">⚡ Veredicto Consenso · ${results.length} IAs</div>
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-        <div>
-          <div style="font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:6px">PRONÓSTICO COMBINADO</div>
-          <div class="consensus-pred">${best.data.prediccion}</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:4px">CONFIANZA PROMEDIO</div>
-          <div class="consensus-conf">${avgConf}%</div>
-        </div>
-      </div>
-
-      <div style="margin-bottom:16px">
-        <div class="agreement-label">NIVEL DE ACUERDO ENTRE IAs — ${agreement}%</div>
-        <div class="agreement-track"><div class="agreement-fill" style="width:${agreement}%"></div></div>
-        <div style="font-size:11px;color:var(--muted);margin-top:5px">
-          ${agreement >= 80 ? '🟢 Alta coincidencia — señal fuerte' : agreement >= 50 ? '🟡 Acuerdo parcial — analizar con cuidado' : '🔴 IAs en desacuerdo — partido incierto'}
-        </div>
-      </div>
-
-      <div>
-        <div class="agreement-label">PROBABILIDADES PROMEDIADAS</div>
-        ${avgProbs.slice(0,3).map(p => `
-          <div class="prob-row-consensus">
-            <div class="prob-label">${p.label}</div>
-            <div class="prob-track"><div class="prob-fill" style="width:${p.pct}%"></div></div>
-            <div class="prob-val">${p.pct}%</div>
-          </div>`).join('')}
-      </div>
-
-      <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.05);font-size:11px;color:var(--muted)">
-        👑 Mayor confianza: <span style="color:var(--gold);font-weight:700">${{claude:'Claude',openai:'ChatGPT',gemini:'Gemini'}[winnerName]}</span> con ${best.data.confianza}% · 
-        Partido: <span style="color:var(--text)">${home} vs ${away}</span>
-      </div>
-    </div>`;
-
-  // Insert consensus before the arena
-  const section = document.getElementById('result-section');
-  const wrap = section.querySelector('.result-wrap');
-  if(wrap) wrap.insertAdjacentHTML('afterbegin', consensusHtml);
 }
+
+function submitTurno() {
+  const n = document.getElementById('f_nombre').value.trim();
+  const s = document.getElementById('f_servicio').value;
+  const fRaw = document.getElementById('f_fecha').value;
+  const f = formatearFecha(fRaw); // convertir a dd-mm-yyyy
+  const h = document.getElementById('f_horario').value;
+  const t = document.getElementById('f_tel').value.trim();
+  if (!n||!s||!fRaw||!h||!t) { alert('Completá todos los campos 👆'); return; }
+
+  // Guardar en Sheet local para el demo visual
+  SHEET.turnos.push({ nombre:n, servicio:s, fecha:f, horario:h, tel:t, estado:'Pendiente' });
+
+  // ✅ Enviar al Google Sheet via Cloudflare Worker (sin CORS)
+  const params = new URLSearchParams({ nombre:n, servicio:s, fecha:f, horario:h, tel:t, action:"guardar" });
+  fetch(APPS_SCRIPT_URL + "?" + params.toString())
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok) console.log("✅ Turno guardado en Sheet");
+      else console.error("❌ Error:", data.error);
+    })
+    .catch(err => console.error("❌ Error de red:", err));
+
+  const b = document.getElementById('chatBody');
+  const conf = document.createElement('div');
+  conf.className = 'msg-row bot';
+  conf.innerHTML = `
+    <div class="confirm-card">
+      <h4>✅ ¡Turno registrado!</h4>
+      <div class="confirm-detail">👤 ${n}<br>✂️ ${s}<br>📅 ${f} · ${h}hs<br>📱 ${t}<br><br>
+      <span style="color:var(--green);font-weight:600">Te confirmaremos por WhatsApp ✉️</span></div>
+    </div><span class="msg-time">${now()}</span>`;
+  b.appendChild(conf);
+
+  const nav = document.createElement('div');
+  nav.className = 'nav-btns';
+  nav.innerHTML = `<button class="nav-btn" onclick="goHome()">🏠 Menú principal</button>`;
+  b.appendChild(nav);
+
+  scrollBottom();
+  updateSheet();
+  showTab('turnos', document.querySelectorAll('.sheet-tab')[1]);
+}
+
+// ═══════════════════════════════════════════
+// TEXTO LIBRE — busca en keywords del Sheet
+// ═══════════════════════════════════════════
+function handleFreeText() {
+  const input = document.getElementById('userInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addUserBubble(text);
+
+  const lower = text.toLowerCase();
+  const match = SHEET.keywords.find(k => lower.includes(k.kw));
+
+  withTyping(700, () => {
+    const b = document.getElementById('chatBody');
+    const d = document.createElement('div');
+    d.className = 'msg-row bot';
+    if (match) {
+      d.innerHTML = `<div class="bubble">${match.resp}</div><span class="msg-time">${now()}</span>`;
+    } else {
+      d.innerHTML = `<div class="bubble">No encontré esa info 🤔 Navegá el menú o preguntame de otra forma.</div><span class="msg-time">${now()}</span>`;
+    }
+    b.appendChild(d);
+    addNavBtns();
+  });
+}
+
+// ═══════════════════════════════════════════
+// SHEET VIEWER
+// ═══════════════════════════════════════════
+function showTab(tab, el) {
+  document.querySelectorAll('.sheet-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  renderSheet(tab);
+}
+function renderSheet(tab) {
+  const c = document.getElementById('sheetContent');
+  if (tab === 'respuestas') {
+    c.innerHTML = `<table><thead><tr><th>Palabra clave</th><th>Respuesta</th></tr></thead><tbody>
+      ${SHEET.keywords.map(k=>`<tr><td><strong>${k.kw}</strong></td><td>${k.resp.replace(/<[^>]+>/g,'').substring(0,50)}...</td></tr>`).join('')}
+    </tbody></table>`;
+  } else {
+    if (!SHEET.turnos.length) {
+      c.innerHTML = `<div style="padding:24px;text-align:center;color:#94a3b8;font-size:13px;">📅 Todavía no hay turnos.<br>Reservá uno desde el chat 👆</div>`;
+    } else {
+      c.innerHTML = `<table><thead><tr><th>Nombre</th><th>Servicio</th><th>Fecha</th><th>Hora</th><th>Estado</th></tr></thead><tbody>
+        ${SHEET.turnos.map(t=>`<tr><td>${t.nombre}</td><td>${t.servicio}</td><td>${t.fecha}</td><td>${t.horario}</td><td><span class="badge pending">🟡 ${t.estado}</span></td></tr>`).join('')}
+      </tbody></table>`;
+    }
+  }
+}
+function updateSheet() {
+  const active = document.querySelector('.sheet-tab.active');
+  renderSheet(active.textContent.includes('Turno') ? 'turnos' : 'respuestas');
+}
+
+// ═══════════════════════════════════════════
+// INICIO
+// ═══════════════════════════════════════════
+window.onload = () => {
+  // Cargar respuestas desde el Google Sheet
+  fetch(APPS_SCRIPT_URL + "?t=" + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      if (data.ok && data.respuestas && data.respuestas.length > 0) {
+        SHEET.keywords = data.respuestas;
+        console.log("✅ Respuestas cargadas desde Sheet:", data.respuestas.length);
+      } else {
+        console.log("⚠️ Usando respuestas locales");
+      }
+      renderSheet('respuestas');
+    })
+    .catch(() => {
+      console.log("⚠️ Error al cargar Sheet, usando respuestas locales");
+      renderSheet('respuestas');
+    });
+
+  withTyping(500, () => {
+    const b = document.getElementById('chatBody');
+    const d = document.createElement('div');
+    d.className = 'msg-row bot';
+    d.innerHTML = `<div class="bubble">¡Hola! 👋 Soy el asistente virtual.<br>¿En qué te puedo ayudar hoy?</div><span class="msg-time">${now()}</span>`;
+    b.appendChild(d);
+    showMenu('main');
+  });
+};
 </script>
 </body>
 </html>
